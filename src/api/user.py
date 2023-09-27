@@ -23,7 +23,7 @@ from src.ml.user import upset_user, query_user
 
 class UserAPI(Function):
     def __init__(self, error: Callable):
-        self.log.info("This is where the initialization code go")
+        self.log.info("Evolves all api about user model")
 
     def Bootstrap(self, app: FastAPI):
         router = APIRouter(
@@ -64,11 +64,11 @@ class UserAPI(Function):
 
             return users
         
-        @router.get("/search", summary="get all users")
+        @router.get("/search", summary="get user by prompt search")
         async def search_user(
-            query: str = Query(description="offset for pagination"),
+            query: str = Query(description="query to search user"),
             count: int = Query(
-                default=10, description="limit for pagination"),
+                default=10, description="count of user"),
             session: Session = Depends(get_db_session),
         ):
             matches = query_user(query, count)
