@@ -121,7 +121,7 @@ class UserAPI(Function):
             user = User()
             user.name = data.name
             user.email = data.email
-            user.skills = data.skills.replace(",", " ")
+            user.skills = data.skills
 
             session.add(user)
             session.flush()
