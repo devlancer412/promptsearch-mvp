@@ -17,14 +17,11 @@ def get_user_index(dimension: int):
 
 def pinecone_user_upsert(id: str, data: dict):
   index = get_user_index(len(data['embedding']))
-  print(data)
-  index.upsert(vectors=[(id, data)])
-  pinecone.deinit()
+  index.upsert(vectors=[{ 'id': id, 'values': data['embedding'] }])
   
 def remove_user_index(id: int):
   index = get_user_index(0)
   index.delete(ids=[id])
-  pinecone.deinit()
   
 def pinecone_user_query(embedding: list, count: int):
   index = get_user_index(len(embedding))

@@ -11,7 +11,7 @@ from fastapi import (
     Path
 )
 from sqlalchemy.orm import Session
-from operator import and_
+from operator import and_, or_
 
 
 from src.schemas.user import UserBase, UserRegister
@@ -19,6 +19,8 @@ from src.models import User
 from src.deps.database import get_db_session
 
 from src.ml.user import upset_user, query_user, remove_user
+
+import json
 
 
 class UserAPI(Function):
@@ -73,7 +75,17 @@ class UserAPI(Function):
         ):
             matches = query_user(query, count)
 
-            return matches
+            users: list[dict] = []
+            for match in matches:
+                user_id = int(str(match['id']).split('_')[1])
+                user = session.query(User).filter(User.id == user_id).first()
+
+                users.append({
+                    'score': match['score'],
+                    'data': user
+                })
+
+            return users
 
         @router.get("/{id}", summary="get a user")
         async def get_user(
@@ -95,6 +107,17 @@ class UserAPI(Function):
             data: UserBase,
             session: Session = Depends(get_db_session),
         ):
+            user = (
+                session.query(User)
+                .filter(or_(User.email == data.email, User.name == data.name))
+                .first()
+            )
+            if user is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User with this email already exist",
+                )
+        
             user = User()
             user.name = data.name
             user.email = data.email
@@ -119,6 +142,17 @@ class UserAPI(Function):
             id: int = Annotated[int, Path(title="The ID of the user to update", ge=1)],
             session: Session = Depends(get_db_session),
         ):
+            user = (
+                session.query(User)
+                .filter(or_(User.email == data.email, User.name == data.name))
+                .first()
+            )
+            if user is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User with this email already exist",
+                )
+        
             user: User = session.query(User).filter(User.id == id).first()
 
             if user is None:
