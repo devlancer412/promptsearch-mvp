@@ -1,0 +1,10 @@
+uvicorn
+fastapi
+fastapi-sqlalchemy 
+pydantic 
+alembic 
+psycopg2
+itsdangerous
+pydantic[email]
+openai
+pinecone-client
