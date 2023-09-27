@@ -18,7 +18,7 @@ from src.schemas.user import UserBase, UserRegister
 from src.models import User
 from src.deps.database import get_db_session
 
-from src.ml.user import upset_user
+from src.ml.user import upset_user, query_user
 
 
 class UserAPI(Function):
@@ -63,6 +63,17 @@ class UserAPI(Function):
             )
 
             return users
+        
+        @router.get("/search", summary="get all users")
+        async def search_user(
+            query: str = Query(description="offset for pagination"),
+            count: int = Query(
+                default=10, description="limit for pagination"),
+            session: Session = Depends(get_db_session),
+        ):
+            matches = query_user(query, count)
+
+            return matches
 
         @router.get("/{id}", summary="get a user")
         async def get_user(

@@ -19,8 +19,14 @@ def pinecone_user_upset(id: str, data: dict):
   index = get_user_index(len(data['embedding']))
   index.upset([(id, data)])
   pinecone.deinit()
-
+  
 def remove_user_index(id: int):
   index = get_user_index(0)
   index.delete(ids=[id])
   pinecone.deinit()
+  
+def pinecone_user_query(embedding: list, count: int):
+  index = get_user_index(len(embedding))
+  res = index.query([embedding], top_k=count, include_metadata=True)
+  return res['matches']
+  
