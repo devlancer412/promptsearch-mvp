@@ -9,15 +9,16 @@ pinecone.init(
 
 def get_user_index(dimension: int):
   # check if 'openai' index already exists (only create index if not)
-  if 'prompt-search-mvp-user' not in pinecone.list_indexes():
-      pinecone.create_index('prompt-search-mvp-user', dimension=dimension)
+  if 'worker-search-mvp' not in pinecone.list_indexes():
+      pinecone.create_index('worker-search-mvp', dimension=dimension)
   # connect to index
-  index = pinecone.Index('prompt-search-mvp-user')
+  index = pinecone.Index('worker-search-mvp')
   return index
 
-def pinecone_user_upset(id: str, data: dict):
+def pinecone_user_upsert(id: str, data: dict):
   index = get_user_index(len(data['embedding']))
-  index.upset([(id, data)])
+  print(data)
+  index.upsert(vectors=[(id, data)])
   pinecone.deinit()
   
 def remove_user_index(id: int):

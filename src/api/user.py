@@ -18,12 +18,12 @@ from src.schemas.user import UserBase, UserRegister
 from src.models import User
 from src.deps.database import get_db_session
 
-from src.ml.user import upset_user, query_user
+from src.ml.user import upset_user, query_user, remove_user
 
 
 class UserAPI(Function):
     def __init__(self, error: Callable):
-        self.log.info("Evolves all api about user model")
+        self.log.info("Envolves all api about user model")
 
     def Bootstrap(self, app: FastAPI):
         router = APIRouter(
@@ -105,7 +105,11 @@ class UserAPI(Function):
             session.commit()
             session.refresh(user, attribute_names=["id", "name", "email", "skills"])
 
-            upset_user(user)
+            try:
+                upset_user(user)
+            except:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Something went wrong on server side")
 
             return user
 
@@ -131,7 +135,11 @@ class UserAPI(Function):
             session.commit()
             session.refresh(user, attribute_names=["id", "name", "email", "skills"])
 
-            upset_user(user)
+            try:
+                upset_user(user)
+            except:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Something went wrong on server side")
 
             return user
 
@@ -140,7 +148,7 @@ class UserAPI(Function):
             id: int = Annotated[int, Path(title="The ID of the user to delete", ge=1)],
             session: Session = Depends(get_db_session),
         ):
-            user: user = (
+            user: User = (
                 session.query(User)
                 .filter(User.id == int(id))
                 .first()
@@ -153,6 +161,12 @@ class UserAPI(Function):
             session.delete(user)
             session.flush()
             session.commit()
+            
+            try:
+                remove_user(user.id)
+            except:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Something went wrong on server side")
 
             return {
                 "success": True

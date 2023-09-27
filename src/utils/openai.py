@@ -8,6 +8,6 @@ def get_embeds(params: str):
   res = openai.Embedding.create(
     input=params, engine=cfg.EMBEDDING_MODEL
   )
-  embeds = res['data']['embedding']
+  embeds = res['data'][0]['embedding']
 
   return embeds
